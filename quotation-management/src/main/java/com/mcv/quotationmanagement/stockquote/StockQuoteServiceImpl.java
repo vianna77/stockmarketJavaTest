@@ -1,14 +1,25 @@
 package com.mcv.quotationmanagement.stockquote;
 
+import com.mcv.quotationmanagement.stock.Stock;
+import com.mcv.quotationmanagement.stockquote.exception.NoSuchElementFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.Set;
 
 @Service
 public class StockQuoteServiceImpl implements StockQuoteService{
-    StockQuoteRepository stockQuoteRepository;
+    private StockQuoteRepository stockQuoteRepository;
+
+    @Value("${stock.manager.api}")
+    private String stockManagerApi;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     public StockQuoteServiceImpl(StockQuoteRepository theStockQuoteRepository) {
@@ -40,5 +51,14 @@ public class StockQuoteServiceImpl implements StockQuoteService{
             savedStockQuote = stockQuoteRepository.save(foundStockQuote);
         }
         return savedStockQuote;
+    }
+
+    @Override
+    public void validateStockId(String stockId) {
+        String url = stockManagerApi + stockId;
+        Stock stock = restTemplate.getForObject(url, Stock.class);
+        if (stock == null) {
+            throw new NoSuchElementFoundException(HttpStatus.PRECONDITION_FAILED, "stock id not found - " + stockId);
+        }
     }
 }
