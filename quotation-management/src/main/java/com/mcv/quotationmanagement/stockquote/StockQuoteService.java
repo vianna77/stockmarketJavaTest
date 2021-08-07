@@ -1,7 +1,9 @@
 package com.mcv.quotationmanagement.stockquote;
 
+import com.mcv.quotationmanagement.stock.Stock;
+
 public interface StockQuoteService {
     StockQuote findByStockId(String stockId);
     StockQuote save(StockQuote stockQuote);
-    void validateStockId(String stockId);
+    Stock validateStockId(String stockId);
 }
