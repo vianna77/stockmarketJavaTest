@@ -4,6 +4,7 @@ import com.mcv.quotationmanagement.stock.Stock;
 import com.mcv.quotationmanagement.stockquote.exception.NoSuchElementFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -54,11 +55,13 @@ public class StockQuoteServiceImpl implements StockQuoteService{
     }
 
     @Override
-    public void validateStockId(String stockId) {
+    @Cacheable( value="stocks" )
+    public Stock validateStockId(String stockId) {
         String url = stockManagerApi + stockId;
         Stock stock = restTemplate.getForObject(url, Stock.class);
         if (stock == null) {
             throw new NoSuchElementFoundException(HttpStatus.PRECONDITION_FAILED, "stock id not found - " + stockId);
         }
+        return stock;
     }
 }
